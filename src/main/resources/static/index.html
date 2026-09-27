@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InternTrack</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h1>InternTrack</h1>
+        <p>Internship Application & Tracking System</p>
+    </div>
+    <button onclick="openForm()">+ Add Internship</button>
+</header>
+
+<main>
+
+    <section class="stats">
+        <div class="card">
+            <h3>Total</h3>
+            <span id="totalCount">0</span>
+        </div>
+
+        <div class="card">
+            <h3>Applied</h3>
+            <span id="appliedCount">0</span>
+        </div>
+
+        <div class="card">
+            <h3>Interview</h3>
+            <span id="interviewCount">0</span>
+        </div>
+
+        <div class="card">
+            <h3>Selected</h3>
+            <span id="selectedCount">0</span>
+        </div>
+
+        <div class="card">
+            <h3>Rejected</h3>
+            <span id="rejectedCount">0</span>
+        </div>
+    </section>
+
+    <section class="toolbar">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by company..."
+            oninput="loadInternships()"
+        >
+
+        <select id="statusFilter" onchange="loadInternships()">
+            <option value="">All Status</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Selected">Selected</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+    </section>
+
+    <section id="internshipList" class="internship-list">
+        <p>Loading internships...</p>
+    </section>
+
+</main>
+
+<div id="formModal" class="modal">
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h2 id="formTitle">Add Internship</h2>
+            <button onclick="closeForm()">×</button>
+        </div>
+
+        <form id="internshipForm">
+
+            <input type="hidden" id="internshipId">
+
+            <label>Company Name</label>
+            <input type="text" id="companyName" required>
+
+            <label>Job Role</label>
+            <input type="text" id="jobRole" required>
+
+            <label>Location</label>
+            <input type="text" id="location">
+
+            <label>Application Date</label>
+            <input type="date" id="applicationDate" required>
+
+            <label>Status</label>
+            <select id="status" required>
+                <option value="Applied">Applied</option>
+                <option value="Interview">Interview</option>
+                <option value="Selected">Selected</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+
+            <div class="form-actions">
+                <button type="button" onclick="closeForm()">Cancel</button>
+                <button type="submit">Save Internship</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
