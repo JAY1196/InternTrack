@@ -3,26 +3,37 @@ const API_URL = "/api/internships";
 let internships = [];
 
 async function loadInternships() {
-    const response = await fetch(API_URL);
-    internships = await response.json();
+    try {
+        const response = await fetch(API_URL);
 
-    const search = document.getElementById("searchInput").value.toLowerCase();
-    const status = document.getElementById("statusFilter").value;
+        if (!response.ok) {
+            throw new Error("Unable to load internships");
+        }
 
-    let filtered = internships;
+        internships = await response.json();
 
-    if (search) {
-        filtered = filtered.filter(item =>
-            item.companyName.toLowerCase().includes(search)
-        );
+        const search = document.getElementById("searchInput").value.toLowerCase();
+        const status = document.getElementById("statusFilter").value;
+
+        let filtered = internships;
+
+        if (search) {
+            filtered = filtered.filter(item =>
+                item.companyName.toLowerCase().includes(search)
+            );
+        }
+
+        if (status) {
+            filtered = filtered.filter(item => item.status === status);
+        }
+
+        displayInternships(filtered);
+        updateStats(internships);
+
+    } catch (error) {
+        document.getElementById("internshipList").innerHTML =
+            "<p>Unable to load internships. Please try again.</p>";
     }
-
-    if (status) {
-        filtered = filtered.filter(item => item.status === status);
-    }
-
-    displayInternships(filtered);
-    updateStats(internships);
 }
 
 function displayInternships(data) {
@@ -82,18 +93,28 @@ function closeForm() {
 }
 
 async function editInternship(id) {
-    const response = await fetch(`${API_URL}/${id}`);
-    const item = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/${id}`);
 
-    document.getElementById("formTitle").textContent = "Edit Internship";
-    document.getElementById("internshipId").value = item.id;
-    document.getElementById("companyName").value = item.companyName;
-    document.getElementById("jobRole").value = item.jobRole;
-    document.getElementById("location").value = item.location || "";
-    document.getElementById("applicationDate").value = item.applicationDate;
-    document.getElementById("status").value = item.status;
+        if (!response.ok) {
+            throw new Error("Unable to load internship");
+        }
 
-    document.getElementById("formModal").style.display = "flex";
+        const item = await response.json();
+
+        document.getElementById("formTitle").textContent = "Edit Internship";
+        document.getElementById("internshipId").value = item.id;
+        document.getElementById("companyName").value = item.companyName;
+        document.getElementById("jobRole").value = item.jobRole;
+        document.getElementById("location").value = item.location || "";
+        document.getElementById("applicationDate").value = item.applicationDate;
+        document.getElementById("status").value = item.status;
+
+        document.getElementById("formModal").style.display = "flex";
+
+    } catch (error) {
+        alert("Unable to load internship.");
+    }
 }
 
 async function deleteInternship(id) {
@@ -101,11 +122,20 @@ async function deleteInternship(id) {
         return;
     }
 
-    await fetch(`${API_URL}/${id}`, {
-        method: "DELETE"
-    });
+    try {
+        const response = await fetch(`${API_URL}/${id}`, {
+            method: "DELETE"
+        });
 
-    loadInternships();
+        if (!response.ok) {
+            throw new Error("Delete failed");
+        }
+
+        await loadInternships();
+
+    } catch (error) {
+        alert("Unable to delete internship.");
+    }
 }
 
 document.getElementById("internshipForm").addEventListener("submit", async function(event) {
@@ -114,33 +144,49 @@ document.getElementById("internshipForm").addEventListener("submit", async funct
     const id = document.getElementById("internshipId").value;
 
     const internship = {
-        companyName: document.getElementById("companyName").value,
-        jobRole: document.getElementById("jobRole").value,
-        location: document.getElementById("location").value,
+        companyName: document.getElementById("companyName").value.trim(),
+        jobRole: document.getElementById("jobRole").value.trim(),
+        location: document.getElementById("location").value.trim(),
         applicationDate: document.getElementById("applicationDate").value,
         status: document.getElementById("status").value
     };
 
-    if (id) {
-        await fetch(`${API_URL}/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(internship)
-        });
-    } else {
-        await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(internship)
-        });
+    if (!internship.companyName || !internship.jobRole || !internship.applicationDate) {
+        alert("Please fill in all required fields.");
+        return;
     }
 
-    closeForm();
-    loadInternships();
+    try {
+        let response;
+
+        if (id) {
+            response = await fetch(`${API_URL}/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(internship)
+            });
+        } else {
+            response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(internship)
+            });
+        }
+
+        if (!response.ok) {
+            throw new Error("Save failed");
+        }
+
+        closeForm();
+        await loadInternships();
+
+    } catch (error) {
+        alert("Unable to save internship.");
+    }
 });
 
 loadInternships();
